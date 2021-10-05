@@ -1,5 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:http/http.dart' as http;
 
 class FullScreenMap extends StatefulWidget {
   const FullScreenMap({Key? key}) : super(key: key);
@@ -17,8 +21,23 @@ class _FullScreenMapState extends State<FullScreenMap> {
 
     void _onMapCreated(MapboxMapController controller) {
       mapController = controller;
+      _onStyleLoaded();
     }
-    void onStyleLoadedCallback() {}
+    void _onStyleLoaded() {
+      addImageFromAsset("assetImage", "assets/custom-icon.png");
+      addImageFromUrl("networkImage", Uri.parse("https://via.placeholder.com/50"));
+    }
+    
+    Future<void> addImageFromAsset(String name, String assetName) async {
+      final ByteData bytes = await rootBundle.load(assetName);
+      final Uint8List list = bytes.buffer.asUint8List();
+      return mapController!.addImage(name, list);
+    }
+
+    Future<void> addImageFromUrl(String name, Uri uri) async {
+      var response = await http.get(uri);
+      return mapController!.addImage(name, response.bodyBytes);
+    }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,8 +55,8 @@ class _FullScreenMapState extends State<FullScreenMap> {
             onPressed: () {
               mapController!.addSymbol(SymbolOptions(
                 geometry: center,
-                iconImage: "college-15",
-                iconSize: 2,
+                iconImage: "assetImage",
+                // iconSize: 2,
                 textField: "School",
                 textOffset: const Offset(0.0, 2.0)
               ));
@@ -63,6 +82,7 @@ class _FullScreenMapState extends State<FullScreenMap> {
             onPressed: (){
               setState(() {
                 selectedStyle = (selectedStyle == darkStyle) ? streetStyle : darkStyle;
+                _onStyleLoaded();
               });
             }
           ),
@@ -79,7 +99,6 @@ class _FullScreenMapState extends State<FullScreenMap> {
         target: center,
         zoom: 14
       ),
-      onStyleLoadedCallback: onStyleLoadedCallback,
     );
   }
 }
