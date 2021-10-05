@@ -32,6 +32,19 @@ class _FullScreenMapState extends State<FullScreenMap> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
+            child: const Icon(Icons.school_sharp),
+            onPressed: () {
+              mapController!.addSymbol(SymbolOptions(
+                geometry: center,
+                iconImage: "college-15",
+                iconSize: 2,
+                textField: "School",
+                textOffset: const Offset(0.0, 2.0)
+              ));
+            }
+          ),
+          const SizedBox(height: 5.0),          
+          FloatingActionButton(
             child: const Icon(Icons.zoom_in),
             onPressed: (){
               mapController!.animateCamera(CameraUpdate.zoomIn());
